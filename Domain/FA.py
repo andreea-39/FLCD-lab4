@@ -37,7 +37,8 @@ class FiniteAutomata:
                         transition_tokens = transition.split(",")
                         trans = (transition_tokens[0], transition_tokens[1])
                         if trans in transitions:
-                            transitions[trans].append(transition_tokens[2])
+                            if transition_tokens[2] not in transitions[trans]:
+                                transitions[trans].append(transition_tokens[2])
                         else:
                             transitions[trans] = [transition_tokens[2]]
                 elif tokens[0] == "initialState":
@@ -74,19 +75,30 @@ class FiniteAutomata:
     def checkSequence(self, sequence) -> bool:
         if not self.isDfa():
             raise ArithmeticError("FiniteAutomata is not a DFA")
+
         currentState = self.initialState
 
         while sequence != "":
             transition_key = (currentState, sequence[0])
+
+            if sequence[0] not in self.alphabet:
+                print(sequence[0], " does not exist in the alphabet")
+                return False
 
             if transition_key in self.transitions.keys():
                 currentState = self.transitions[transition_key][0]
                 sequence = sequence[1:]
 
             else:
+                print(transition_key, " this transition does not exist")
                 return False
 
-        return currentState in self.finalStates
+        if currentState in self.finalStates:
+            print("Sequence is accepted")
+            return True
+        else:
+            print("Sequence is not accepted")
+            return False
 
 
 if __name__ == "__main__":
