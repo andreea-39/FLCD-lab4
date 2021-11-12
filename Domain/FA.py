@@ -1,28 +1,28 @@
 from typing import List, Dict, Tuple
 
 
-class FiniteAutomaton:
+class FiniteAutomata:
     states: List[str]
     alphabet: List[str]
     transitions: Dict[Tuple[str, str], List[str]]
-    initial_state: str
-    final_states: List[str]
+    initialState: str
+    finalStates: List[str]
 
     def __init__(self, states: List[str], alphabet: List[str], transitions: Dict[Tuple[str, str], List[str]],
                  initial_state: str, final_states: List[str]):
         self.states = states
         self.alphabet = alphabet
         self.transitions = transitions
-        self.initial_state = initial_state
-        self.final_states = final_states
+        self.initialState = initial_state
+        self.finalStates = final_states
 
     @staticmethod
     def readFromFile(file_name: str):
         states = []
         alphabet = []
         transitions = {}
-        initial_state = None
-        final_states = []
+        initialState = None
+        finalStates = []
 
         with open(file_name, 'r') as file:
             for lineCounter, line in enumerate(file, start=1):
@@ -41,10 +41,12 @@ class FiniteAutomaton:
                         else:
                             transitions[trans] = [transition_tokens[2]]
                 elif tokens[0] == "initialState":
-                    initial_state = tokens[1]
+                    initialState = tokens[1]
                 elif tokens[0] == "finalState":
-                    final_states = tokens[1:]
-        return FiniteAutomaton(states, alphabet, transitions, initial_state, final_states)
+                    finalStates = tokens[1:]
+        return FiniteAutomata(states, alphabet, transitions, initialState, finalStates)
+
+
 
     def printStates(self):
         print("Set of states: ", self.states)
@@ -53,39 +55,70 @@ class FiniteAutomaton:
         print("FA alphabet: ", self.alphabet)
 
     def printInitialState(self):
-        print("Initial state: ", self.initial_state)
+        print("Initial state: ", self.initialState)
 
     def printFinalStates(self):
-        print("Final states: ", self.final_states)
+        print("Final states: ", self.finalStates)
 
     def printTransitions(self):
         print("Transitions: ")
-        for t in self.transitions.keys():
-            print("delta({0}, {1}) = {2}".format(t[0], t[1], self.transitions[t]))
+        for transition in self.transitions.keys():
+            print("delta({0}, {1}) = {2}".format(transition[0], transition[1], self.transitions[transition]))
+
+    def isDfa(self) -> bool:
+        for key in self.transitions.keys():
+            if len(self.transitions[key]) > 1:
+                return False
+        return True
 
     def checkSequence(self, sequence) -> bool:
-        current_state = self.initial_state
+        if not self.isDfa():
+            raise ArithmeticError("FiniteAutomata is not a DFA")
+        currentState = self.initialState
 
         while sequence != "":
-            transition_key = (current_state, sequence[0])
+            transition_key = (currentState, sequence[0])
 
             if transition_key in self.transitions.keys():
-                current_state = self.transitions[transition_key][0]
+                currentState = self.transitions[transition_key][0]
                 sequence = sequence[1:]
 
             else:
                 return False
 
-        return current_state in self.final_states
+        return currentState in self.finalStates
 
 
 if __name__ == "__main__":
-    automata = FiniteAutomaton.readFromFile("fa_test.in")
-    automata.printStates()
-    automata.printAlphabet()
-    automata.printInitialState()
-    automata.printFinalStates()
-    automata.printTransitions()
-    print("12345", automata.checkSequence("12345"))
-    print("123c45", automata.checkSequence("123c45"))
-    print("012345", automata.checkSequence("123c45"))
+    print(""
+          "1. Display the set of states \n"
+          "2. Display the alphabet \n"
+          "3. Display all the transitions \n"
+          "4. Display the set of final states \n"
+          "5. Check if a sequence is accepted by the FA \n"
+          "0. Exit.")
+
+    automata = FiniteAutomata.readFromFile("fa_test.in")
+    menuOption = input("-> ")
+
+
+    while menuOption != "0":
+        if menuOption == "1":
+            automata.printStates()
+            menuOption = input("-> ")
+        elif menuOption == "2":
+            automata.printAlphabet()
+            menuOption = input("-> ")
+        elif menuOption == "3":
+            automata.printTransitions()
+            menuOption = input("-> ")
+        elif menuOption == "4":
+            automata.printFinalStates()
+            menuOption = input("-> ")
+        elif menuOption == "5":
+            sequence = input("Sequence: ")
+            print(sequence, automata.checkSequence(sequence))
+            menuOption = input("-> ")
+
+
+
